@@ -1,7 +1,6 @@
 import os
 import torch
 import chromadb
-from typing import List, Dict, Any
 from sentence_transformers import SentenceTransformer
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
