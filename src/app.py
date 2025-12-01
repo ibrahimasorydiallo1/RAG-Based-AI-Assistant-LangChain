@@ -4,28 +4,42 @@ from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from vectordb import VectorDB
-from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.document_loaders import TextLoader
 
 # Load environment variables
 load_dotenv()
 
 
-def load_documents() -> List[str]:
+def load_documents(documents_path="data") -> List[str]:
     """
     Load documents for demonstration.
 
     Returns:
         List of sample documents
     """
-    results = []
-    # TODO: Implement document loading
-    # HINT: Read the documents from the data directory
-    # HINT: Return a list of documents
-    # HINT: Your implementation depends on the type of documents you are using (.txt, .pdf, etc.)
+    # List to store all documents
+    documents = []
 
-    # Your implementation here
+    # Load each .txt file in the doc folder
+    for file in os.listdir(documents_path):
+        if file.endswith(".txt"):
+            file_path = os.path.join(documents_path, file)
+            try:
+                loader = TextLoader(file_path)
+                loaded_docs = loader.load()
+                documents.extend(loaded_docs)
+                print(f"Successfully loaded: {file}")
+            except Exception as e:
+                print(f"Error loading {file}: {e}")
+
+    print(f"\nTotal documents loaded: {len(documents)}")
+
+    # Extract content as strings and return
+    results = []
+    for doc in documents:
+        results.append(doc.page_content)
+        
     return results
 
 
@@ -41,8 +55,7 @@ class RAGAssistant:
         self.llm = self._initialize_llm()
         if not self.llm:
             raise ValueError(
-                "No valid API key found. Please set one of: "
-                "OPENAI_API_KEY, GROQ_API_KEY, or GOOGLE_API_KEY in your .env file"
+                "No valid Groq API key found. Please set it in your .env file"
             )
 
         # Initialize vector database
@@ -65,33 +78,18 @@ class RAGAssistant:
         Initialize the LLM by checking for available API keys.
         Tries OpenAI, Groq, and Google Gemini in that order.
         """
-        # Check for OpenAI API key
-        if os.getenv("OPENAI_API_KEY"):
-            model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-            print(f"Using OpenAI model: {model_name}")
-            return ChatOpenAI(
-                api_key=os.getenv("OPENAI_API_KEY"), model=model_name, temperature=0.0
-            )
 
-        elif os.getenv("GROQ_API_KEY"):
+        # Check for Groq API key
+        if os.getenv("GROQ_API_KEY"): 
             model_name = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
             print(f"Using Groq model: {model_name}")
             return ChatGroq(
-                api_key=os.getenv("GROQ_API_KEY"), model=model_name, temperature=0.0
-            )
-
-        elif os.getenv("GOOGLE_API_KEY"):
-            model_name = os.getenv("GOOGLE_MODEL", "gemini-2.0-flash")
-            print(f"Using Google Gemini model: {model_name}")
-            return ChatGoogleGenerativeAI(
-                google_api_key=os.getenv("GOOGLE_API_KEY"),
-                model=model_name,
-                temperature=0.0,
+                api_key=os.getenv("GROQ_API_KEY"), model=model_name, temperature=0.7
             )
 
         else:
             raise ValueError(
-                "No valid API key found. Please set one of: OPENAI_API_KEY, GROQ_API_KEY, or GOOGLE_API_KEY in your .env file"
+                "No valid API key found. Please set the GROQ_API_KEY in your .env file"
             )
 
     def add_documents(self, documents: List) -> None:
@@ -151,10 +149,8 @@ def main():
 
     except Exception as e:
         print(f"Error running RAG assistant: {e}")
-        print("Make sure you have set up your .env file with at least one API key:")
-        print("- OPENAI_API_KEY (OpenAI GPT models)")
+        print("Make sure you have set up your .env file the API key:")
         print("- GROQ_API_KEY (Groq Llama models)")
-        print("- GOOGLE_API_KEY (Google Gemini models)")
 
 
 if __name__ == "__main__":

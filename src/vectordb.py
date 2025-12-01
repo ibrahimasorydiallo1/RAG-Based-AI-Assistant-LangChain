@@ -1,7 +1,10 @@
 import os
+import torch
 import chromadb
 from typing import List, Dict, Any
 from sentence_transformers import SentenceTransformer
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class VectorDB:
@@ -39,7 +42,7 @@ class VectorDB:
 
         print(f"Vector database initialized with collection: {self.collection_name}")
 
-    def chunk_text(self, text: str, chunk_size: int = 500) -> List[str]:
+    def chunk_text(self, text: str, title: str = '', chunk_size: int = 1000) -> List[str]:
         """
         Simple text chunking by splitting on spaces and grouping into chunks.
 
@@ -50,28 +53,46 @@ class VectorDB:
         Returns:
             List of text chunks
         """
-        # TODO: Implement text chunking logic
-        # You have several options for chunking text - choose one or experiment with multiple:
-        #
-        # OPTION 1: Simple word-based splitting
-        #   - Split text by spaces and group words into chunks of ~chunk_size characters
-        #   - Keep track of current chunk length and start new chunks when needed
-        #
-        # OPTION 2: Use LangChain's RecursiveCharacterTextSplitter
-        #   - from langchain_text_splitters import RecursiveCharacterTextSplitter
-        #   - Automatically handles sentence boundaries and preserves context better
-        #
-        # OPTION 3: Semantic splitting (advanced)
-        #   - Split by sentences using nltk or spacy
-        #   - Group semantically related sentences together
-        #   - Consider paragraph boundaries and document structure
-        #
-        # Feel free to try different approaches and see what works best!
+        # For this, we will use LangChain's RecursiveCharacterTextSplitter
+        # because it automatically handles sentence boundaries and preserves context better
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,  # ~200 words per chunk
+            chunk_overlap=200,  # Overlap to preserve context
+            separators=["\n\n", "\n", " ", "", ". "],
+        )
 
-        chunks = []
-        # Your implementation here
+        chunks = text_splitter.split_text(text)
 
-        return chunks
+        # Add metadata to each chunk
+        chunk_data = []
+        for i, chunk in enumerate(chunks):
+            chunk_data.append(
+                {
+                    "content": chunk,               
+                    "title": title,
+                    "chunk_index": f"{title}_{i}",     
+                }
+            )
+
+        return chunk_data
+
+    def embed_documents(self, documents: list[str]) -> list[list[float]]:
+        """
+        We convert our text chunks into vector embeddings that capture semantic meaning
+        so that similar texts are close in vector space.
+        Each chunk becomes a 384-dimensional vector
+        """
+        device = (
+            "cuda" if torch.cuda.is_available()
+            else "mps" if torch.backends.mps.is_available() else "cpu"
+        )
+        model = HuggingFaceEmbeddings(
+            model_name=self.embedding_model_name,
+            model_kwargs={"device": device},
+        )
+
+        embeddings = model.embed_documents(documents)
+        return embeddings
 
     def add_documents(self, documents: List) -> None:
         """
@@ -80,18 +101,27 @@ class VectorDB:
         Args:
             documents: List of documents
         """
-        # TODO: Implement document ingestion logic
-        # HINT: Loop through each document in the documents list
-        # HINT: Extract 'content' and 'metadata' from each document dict
-        # HINT: Use self.chunk_text() to split each document into chunks
-        # HINT: Create unique IDs for each chunk (e.g., "doc_0_chunk_0")
-        # HINT: Use self.embedding_model.encode() to create embeddings for all chunks
-        # HINT: Store the embeddings, documents, metadata, and IDs in your vector database
-        # HINT: Print progress messages to inform the user
+        # Now we store our chunks and their embeddings in ChromaDB for fast retrieval
+        next_id = self.collection_name.count()
 
-        print(f"Processing {len(documents)} documents...")
-        # Your implementation here
-        print("Documents added to vector database")
+        for document in documents:
+            chunked_document = self.chunk_text(document)    # to split each document into chunks
+            embeddings = self.embed_documents(chunked_document)    # to get embeddings for each chunk
+            ids = list(range(next_id, next_id + len(chunked_document)))
+            ids = [f"doc_{id}" for id in ids]
+
+            # We store the embeddings, documents, metadata, and IDs in the vector database
+            # We're storing each chunk with its embedding and a unique ID.
+            self.collection.add(
+                embeddings=embeddings,
+                ids=ids,
+                documents=chunked_document,
+            )
+            next_id += len(chunked_document)
+            # HINT: Print progress messages to inform the user
+            # We're storing each chunk with its embedding and a unique ID.
+            print(f"Processing {len(documents)} documents...")
+            print("Documents added to vector database")
 
     def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
         """
@@ -104,17 +134,41 @@ class VectorDB:
         Returns:
             Dictionary containing search results with keys: 'documents', 'metadatas', 'distances', 'ids'
         """
-        # TODO: Implement similarity search logic
-        # HINT: Use self.embedding_model.encode([query]) to create query embedding
-        # HINT: Convert the embedding to appropriate format for your vector database
-        # HINT: Use your vector database's search/query method with the query embedding and n_results
-        # HINT: Return a dictionary with keys: 'documents', 'metadatas', 'distances', 'ids'
-        # HINT: Handle the case where results might be empty
+        # Convert question to vector
+        print(f"Retrieving relevant documents for query: {query}")
 
-        # Your implementation here
-        return {
-            "documents": [],
-            "metadatas": [],
-            "distances": [],
+        relevant_results = {
             "ids": [],
+            "documents": [],
+            "distances": [],
+            "metadatas": [],
         }
+
+        # Embed the query using the same model used for documents
+        print("Embedding query...")
+        query_embedding = self.embed_documents([query])[0]  # Get the first (and only) embedding
+
+        print("Querying collection...")
+        # Query the collection
+        # 'query' will allow us to get the n_results nearest neighbor embeddings for provided query_embeddings or query_texts.
+        results = self.collection.query(
+            query_embeddings=[query_embedding],
+            n_results=n_results,
+            include=["documents", "distances", "metadatas"],
+        )
+
+        print("Filtering results...")
+        keep_item = [False] * len(results["ids"][0])
+        for i, distance in enumerate(results["distances"][0]):
+            if distance < 0.4:  # Example threshold for similarity
+                keep_item[i] = True
+
+        for i, keep in enumerate(keep_item):
+            if keep:
+                relevant_results["ids"].append(results["ids"][0][i])
+                relevant_results["documents"].append(results["documents"][0][i])
+                relevant_results["distances"].append(results["distances"][0][i])
+                relevant_results["metadatas"].append(results["metadatas"][0][i])
+                
+
+        return relevant_results
