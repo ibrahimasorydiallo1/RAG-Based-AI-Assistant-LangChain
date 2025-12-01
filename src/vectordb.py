@@ -24,7 +24,7 @@ class VectorDB:
             "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
         )
 
-        # Initialize ChromaDB client
+        # Initialise ChromaDB client
         self.client = chromadb.PersistentClient(path="./chroma_db")
 
         # Load embedding model
