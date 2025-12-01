@@ -7,8 +7,6 @@ from vectordb import VectorDB
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import TextLoader
 
-from prompt_builder import build_prompt_from_config
-
 # Load environment variables
 load_dotenv()
 
