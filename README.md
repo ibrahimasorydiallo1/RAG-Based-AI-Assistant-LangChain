@@ -1,5 +1,5 @@
 # RAG-Based-AI-Assistant
-This is a RAG (Retrieval-Augmented Generation) AI assistant. RAG systems combine document search with AI chat - they can answer questions about your specific documents by finding relevant information and using it to generate responses.  Think of it as: ChatGPT that knows about YOUR documents and can answer questions about them.
+This is a RAG (Retrieval-Augmented Generation) AI assistant. RAG systems combine document search with AI chat - they can answer questions about our specific documents by finding relevant information and using it to generate responses.  Think of it as: ChatGPT that knows about OUR documents and can answer questions about them.
 
 ## Target Audience
 
@@ -12,7 +12,7 @@ This project is addressed also to other students who are striving to become one 
 
 By completing this project, we'll have an AI assistant that can:
 
-- 📄 **Load your documents** (PDFs, text files, etc.)
+- 📄 **Load the documents** (PDFs, text files, etc.)
 - 🔍 **Search through them** to find relevant information
 - 💬 **Answer questions** using the information it found
 - 🧠 **Combine multiple sources** to give comprehensive answers
@@ -33,7 +33,7 @@ We will implement a complete RAG system that can:
 
 The project requires implementing 7 main steps:
 
-1. **Prepare Your Documents** - Adding our own documents to the data directory
+1. **Prepare the Documents** - Adding our own documents to the data directory
 2. **Document Loading** - Loading documents from files into the system
 3. **Text Chunking** - Spliting documents into smaller, searchable chunks
 4. **Document Ingestion** - Processing and storing documents in the vector database  
@@ -78,9 +78,9 @@ python src/app.py
 
 We will try these example questions:
 
-- "What is [topic from your documents]?"
-- "Explain [concept from your documents]"
-- "How does [process from your documents] work?"
+- "What is [topic from the documents]?"
+- "Explain [concept from the documents]"
+- "How does [process from the documents] work?"
 
 ---
 
@@ -96,36 +96,6 @@ Before starting, make sure you have:
   - [Groq](https://console.groq.com/keys) (free tier available)
   - [Google AI](https://aistudio.google.com/app/apikey) (competitive pricing)
 
-### Quick Setup
-
-1. **Clone and install dependencies:**
-
-   ```bash
-   git clone [your-repo-url]
-   cd rt-aaidc-project1-template
-   pip install -r requirements.txt
-   ```
-
-2. **Configure your API key:**
-
-   ```bash
-   # Create environment file (choose the method that works on the system)
-   cp .env.example .env    # Linux/Mac
-   copy .env.example .env  # Windows
-   ```
-
-   Edit `.env` and add the API key:
-
-   ```
-   OPENAI_API_KEY=your_key_here
-   # OR
-   GROQ_API_KEY=your_key_here  
-   # OR
-   GOOGLE_API_KEY=your_key_here
-   ```
-
-
----
 
 ## Repository Structure
 
@@ -156,7 +126,7 @@ RAG-Based-AI-Assistant-LangChain/
 
    ```bash
    git clone https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain.git
-   cd rt-agentic-ai-cert-week3
+   cd RAG-Based-AI-Assistant-LangChain
    ```
 
 2. **Install dependencies:**
@@ -165,15 +135,15 @@ RAG-Based-AI-Assistant-LangChain/
    pip install -r requirements.txt
    ```
 
-3. **Set up your Groq API key:**
+3. **Set up the Groq API key:**
 
-   Create a `.env` file in the root directory and add your API key:
+   Create a `.env` file in the root directory and add the API key:
 
    ```
-   GROQ_API_KEY=your-api-key-here
+   GROQ_API_KEY=the-api-key-here
    ```
 
-   You can get your API key from [Groq](https://console.groq.com/).
+   You can get the API key from [Groq](https://console.groq.com/).
 
 ---
 
@@ -194,7 +164,7 @@ By completing this project, we will:
 
 Our implementation is complete since:
 
-1. ✅ We can load your own documents
+1. ✅ We can load our own documents
 2. ✅ The system chunks and embeds documents
 3. ✅ Search returns relevant results
 4. ✅ The RAG system generates contextual answers

@@ -27,20 +27,32 @@ def load_documents(documents_path="data") -> List[str]:
             file_path = os.path.join(documents_path, file)
             try:
                 loader = TextLoader(file_path)
-                loaded_docs = loader.load()
-                documents.extend(loaded_docs)
+                for doc in loader.load():
+                    documents.append(doc.page_content)
                 print(f"Successfully loaded: {file}")
             except Exception as e:
                 print(f"Error loading {file}: {e}")
 
+    print(f"Voilà le type des documents chargés : {type(documents)}")
     print(f"\nTotal documents loaded: {len(documents)}")
-    
+
     # Extract content as strings and return
     results = []
     for doc in documents:
         results.append(doc.page_content)
-        
+    print(f"Voilà le type des resultats chargés : {type(results)}")
+
     return results
+
+    # Flatten list if nested
+    flat_docs = []
+    for d in documents:
+        if isinstance(d, list):
+            flat_docs.extend(d)
+        else:
+            flat_docs.append(d)
+
+    return flat_docs
 
 
 class RAGAssistant:
@@ -179,6 +191,7 @@ def main():
         # Load sample documents
         print("\nLoading documents...")
         sample_docs = load_documents()
+        print(f"The sample documents loaded are of type: {type(sample_docs)}")
         print(f"Loaded {len(sample_docs)} sample documents")
 
         assistant.add_documents(sample_docs)

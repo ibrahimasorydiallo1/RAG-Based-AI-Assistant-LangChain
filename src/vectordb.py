@@ -83,22 +83,26 @@ class VectorDB:
         so that similar texts are close in vector space.
         Each chunk becomes a 384-dimensional vector
         """
-        device = (
-            "cuda" 
-            if torch.cuda.is_available()
-            else "mps" if torch.backends.mps.is_available() else "cpu"
-        )
-        model = HuggingFaceEmbeddings(
-            model_name=self.embedding_model_name,
-            model_kwargs={"device": device},
-        )
+        try:
+            device = (
+                "cuda" 
+                if torch.cuda.is_available()
+                else "mps" if torch.backends.mps.is_available() else "cpu"
+            )
+            model = HuggingFaceEmbeddings(
+                model_name=self.embedding_model_name,
+                model_kwargs={"device": device},
+            )
+        except Exception as e:
+            print("Error loading embedding model:", e)
+            raise e
 
-        # model = HuggingFaceEmbeddings(
-        #     model_name=self.embedding_model_name,
-        #     model_kwargs={"device": "cpu"},  # pas de torch → device=cpu
-        # )
-
-        embeddings = model.embed_documents(documents)
+        print(f"Le type des documents est : {type(documents)}")
+        try:
+            embeddings = model.embed_documents(documents)
+        except Exception as e:
+            print("Error generating embeddings:", e)
+            raise e
         return embeddings
 
     def add_documents(self, documents: List) -> None:
@@ -113,7 +117,9 @@ class VectorDB:
 
         for document in documents:
             chunked_document = self.chunk_text(document)    # to split each document into chunks
+
             embeddings = self.embed_documents(chunked_document)    # to get embeddings for each chunk
+            print(f"Generated {len(embeddings)} embeddings for document chunks.")
             ids = list(range(next_id, next_id + len(chunked_document)))
             ids = [f"doc_{id}" for id in ids]
 
