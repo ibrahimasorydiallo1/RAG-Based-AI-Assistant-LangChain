@@ -41,7 +41,7 @@ class VectorDB:
 
         print(f"Vector database initialized with collection: {self.collection_name}")
 
-    def chunk_text(self, text: str, title: str = '', chunk_size: int = 1000) -> List[str]:
+    def chunk_text(self, text: str, title: str = '', chunk_size: int = 1000):
         """
         Simple text chunking by splitting on spaces and grouping into chunks.
 
@@ -82,7 +82,8 @@ class VectorDB:
         Each chunk becomes a 384-dimensional vector
         """
         device = (
-            "cuda" if torch.cuda.is_available()
+            "cuda" 
+            if torch.cuda.is_available()
             else "mps" if torch.backends.mps.is_available() else "cpu"
         )
         model = HuggingFaceEmbeddings(
@@ -90,10 +91,15 @@ class VectorDB:
             model_kwargs={"device": device},
         )
 
+        # model = HuggingFaceEmbeddings(
+        #     model_name=self.embedding_model_name,
+        #     model_kwargs={"device": "cpu"},  # pas de torch → device=cpu
+        # )
+
         embeddings = model.embed_documents(documents)
         return embeddings
 
-    def add_documents(self, documents: List) -> None:
+    def add_documents(self, documents) -> None:
         """
         Add documents to the vector database.
 
@@ -101,7 +107,7 @@ class VectorDB:
             documents: List of documents
         """
         # Now we store our chunks and their embeddings in ChromaDB for fast retrieval
-        next_id = self.collection_name.count()
+        next_id = self.collection.count()
 
         for document in documents:
             chunked_document = self.chunk_text(document)    # to split each document into chunks
@@ -122,7 +128,7 @@ class VectorDB:
             print(f"Processing {len(documents)} documents...")
             print("Documents added to vector database")
 
-    def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
+    def search(self, query: str, n_results: int = 5):
         """
         Search for similar documents in the vector database.
 
@@ -168,6 +174,5 @@ class VectorDB:
                 relevant_results["documents"].append(results["documents"][0][i])
                 relevant_results["distances"].append(results["distances"][0][i])
                 relevant_results["metadatas"].append(results["metadatas"][0][i])
-                
 
         return relevant_results
