@@ -35,7 +35,6 @@ def load_documents(documents_path="data") -> List[str]:
 
     print(f"\nTotal documents loaded: {len(documents)}")
     
-
     # Extract content as strings and return
     results = []
     for doc in documents:

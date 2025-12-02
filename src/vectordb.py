@@ -1,5 +1,7 @@
 import os
 import torch
+from typing import List, Dict, Any
+
 import chromadb
 from sentence_transformers import SentenceTransformer
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -99,7 +101,7 @@ class VectorDB:
         embeddings = model.embed_documents(documents)
         return embeddings
 
-    def add_documents(self, documents) -> None:
+    def add_documents(self, documents: List) -> None:
         """
         Add documents to the vector database.
 
@@ -128,7 +130,7 @@ class VectorDB:
             print(f"Processing {len(documents)} documents...")
             print("Documents added to vector database")
 
-    def search(self, query: str, n_results: int = 5):
+    def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
         """
         Search for similar documents in the vector database.
 
