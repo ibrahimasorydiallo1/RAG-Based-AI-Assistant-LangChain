@@ -3,7 +3,7 @@ This is a RAG (Retrieval-Augmented Generation) AI assistant. RAG systems combine
 
 ## Target Audience
 
-I had the opportunity to complete this project in order to validate my 1st module in my learning journey with Ready tensor flow:
+I had the opportunity to complete this project in order to validate my 1st module in my learning journey with Ready Tensor AI:
 https://www.readytensor.ai/
 
 This project is addressed also to other students who are striving to become one of best in this field. It is also addressed to recruiters as I am looking for an intership to get my degree.
