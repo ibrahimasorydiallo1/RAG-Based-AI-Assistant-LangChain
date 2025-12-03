@@ -16,43 +16,32 @@ def load_documents(documents_path="data") -> List[str]:
     Load documents for demonstration.
 
     Returns:
-        List of sample documents
+        List[str]: raw text content of each document
     """
-    # List to store all documents
     documents = []
 
-    # Load each .txt file in the doc folder
-    for file in os.listdir(documents_path):
-        if file.endswith(".txt"):
-            file_path = os.path.join(documents_path, file)
-            try:
+    # Load each .txt file in the folder
+    try:
+        for filename in os.listdir(documents_path):
+            if filename.endswith(".txt"):
+                file_path = os.path.join(documents_path, filename)
+
                 loader = TextLoader(file_path)
-                for doc in loader.load():
-                    documents.append(doc.page_content)
-                print(f"Successfully loaded: {file}")
-            except Exception as e:
-                print(f"Error loading {file}: {e}")
+                loaded_docs = loader.load()  # returns List[Document]
 
-    print(f"Voilà le type des documents chargés : {type(documents)}")
-    print(f"\nTotal documents loaded: {len(documents)}")
+                # print(f"Contenu des documents chargés : {loaded_docs}")
 
-    # Extract content as strings and return
-    results = []
-    for doc in documents:
-        results.append(doc.page_content)
-    print(f"Voilà le type des resultats chargés : {type(results)}")
+                # Extract page_content from each Document
+                # for doc in loaded_docs:
+                #     documents.append(doc.page_content)
+                documents.extend(loaded_docs)
 
-    return results
+                print(f"Successfully loaded: {filename}")
 
-    # Flatten list if nested
-    flat_docs = []
-    for d in documents:
-        if isinstance(d, list):
-            flat_docs.extend(d)
-        else:
-            flat_docs.append(d)
+    except Exception as e:
+        print(f"Error loading documents: {e}")
 
-    return flat_docs
+    return documents
 
 
 class RAGAssistant:
@@ -191,8 +180,8 @@ def main():
         # Load sample documents
         print("\nLoading documents...")
         sample_docs = load_documents()
-        print(f"The sample documents loaded are of type: {type(sample_docs)}")
         print(f"Loaded {len(sample_docs)} sample documents")
+        # print(f"Sample docs contient: {sample_docs[:1]}")
 
         assistant.add_documents(sample_docs)
 
@@ -209,8 +198,6 @@ def main():
     except Exception as e:
         print(f"Error running RAG assistant: {e}")
         print("Make sure you have set up your .env file the API key:")
-        print("- GROQ_API_KEY (Groq Llama models)")
-
 
 if __name__ == "__main__":
     main()

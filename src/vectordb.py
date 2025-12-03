@@ -56,85 +56,92 @@ class VectorDB:
         """
         # For this, we will use LangChain's RecursiveCharacterTextSplitter
         # because it automatically handles sentence boundaries and preserves context better
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size,  # ~200 words per chunk
-            chunk_overlap=200,  # Overlap to preserve context
-            separators=["\n\n", "\n", " ", "", ". "],
-        )
-
-        chunks = text_splitter.split_text(text)
-
-        # Add metadata to each chunk
-        chunk_data = []
-        for i, chunk in enumerate(chunks):
-            chunk_data.append(
-                {
-                    "content": chunk,               
-                    "title": title,
-                    "chunk_index": f"{title}_{i}",     
-                }
+        try:
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,  # ~200 words per chunk
+                chunk_overlap=200,  # Overlap to preserve context
+                separators=["\n\n", "\n", " ", "", ". "],
             )
+
+            chunks = text_splitter.split_text(text)
+
+            # Add metadata to each chunk
+            chunk_data = []
+            for i, chunk in enumerate(chunks):
+                chunk_data.append(
+                    {
+                        "content": chunk,               
+                        "title": title,
+                        "chunk_index": f"{title}_{i}",     
+                    }
+                )
+        except Exception as e:
+            print("Error during text chunking:", e)
 
         return chunk_data
-
-    def embed_documents(self, documents: list[str]) -> list[list[float]]:
-        """
-        We convert our text chunks into vector embeddings that capture semantic meaning
-        so that similar texts are close in vector space.
-        Each chunk becomes a 384-dimensional vector
-        """
-        try:
-            device = (
-                "cuda" 
-                if torch.cuda.is_available()
-                else "mps" if torch.backends.mps.is_available() else "cpu"
-            )
-            model = HuggingFaceEmbeddings(
-                model_name=self.embedding_model_name,
-                model_kwargs={"device": device},
-            )
-        except Exception as e:
-            print("Error loading embedding model:", e)
-            raise e
-
-        print(f"Le type des documents est : {type(documents)}")
-        try:
-            embeddings = model.embed_documents(documents)
-        except Exception as e:
-            print("Error generating embeddings:", e)
-            raise e
-        return embeddings
 
     def add_documents(self, documents: List) -> None:
         """
         Add documents to the vector database.
 
         Args:
-            documents: List of documents
+            documents: List of dicts with keys {"content": str, "metadata": dict}
         """
-        # Now we store our chunks and their embeddings in ChromaDB for fast retrieval
-        next_id = self.collection.count()
 
-        for document in documents:
-            chunked_document = self.chunk_text(document)    # to split each document into chunks
+        print(f"Processing {len(documents)} documents...")
 
-            embeddings = self.embed_documents(chunked_document)    # to get embeddings for each chunk
-            print(f"Generated {len(embeddings)} embeddings for document chunks.")
-            ids = list(range(next_id, next_id + len(chunked_document)))
-            ids = [f"doc_{id}" for id in ids]
-
-            # We store the embeddings, documents, metadata, and IDs in the vector database
-            # We're storing each chunk with its embedding and a unique ID.
-            self.collection.add(
-                embeddings=embeddings,
-                ids=ids,
-                documents=chunked_document,
+        # Load embedding model once
+        try:
+            device = (
+                "cuda"
+                if torch.cuda.is_available()
+                else "mps" if torch.backends.mps.is_available() else "cpu"
             )
-            next_id += len(chunked_document)
-            # HINT: Print progress messages to inform the user
-            # We're storing each chunk with its embedding and a unique ID.
-            print(f"Processing {len(documents)} documents...")
-            print("Documents added to vector database")
+
+            embedding_model = SentenceTransformer(self.embedding_model_name, device=device)
+            # print(f"Looking at id: {embedding_model}")
+
+        except Exception as e:
+            print("Error loading embedding model:", e)
+
+        # Start ID
+        next_id = self.collection.count()
+        # print(f"Looking at id: {next_id}")
+
+        # Process each document
+        for doc_index, doc in enumerate(documents):
+
+            content = doc.page_content
+            title = doc.metadata.get("source", "")
+
+            print(f"Looking at content: {content}")
+            chunked_document = self.chunk_text(content)
+
+            text_chunks = [chunk["content"] for chunk in chunked_document]
+
+            # Create IDs
+            ids = [f"doc_{next_id + i}_chunk_{i}" for i in range(len(text_chunks))]
+
+            # Create embeddings for all chunks
+            try:
+                embeddings = embedding_model.encode(text_chunks).tolist()
+                print(f"[Doc {doc_index}] Generated {len(embeddings)} embeddings")
+
+            except Exception as e:
+                print(f"Error generating embeddings for doc {doc_index}:", e)
+
+            # Push to Chroma
+            self.collection.add(
+                ids=ids,
+                documents=text_chunks,
+                embeddings=embeddings,
+                metadatas=chunked_document,
+            )
+
+            next_id += len(text_chunks)
+            print(f"[Doc {doc_index}] Added {len(text_chunks)} chunks to vector DB")
+
+        print("Documents added to vector database")
 
     def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
         """
