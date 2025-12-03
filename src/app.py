@@ -137,7 +137,7 @@ class RAGAssistant:
         Returns:
             LLM answer as a string
         """
-
+        print("\n--- RAG Pipeline Invocation ---\n")
         # Retrieve vector results
         results = self.vector_db.search(query, n_results=n_results)
 
@@ -181,7 +181,6 @@ def main():
         print("\nLoading documents...")
         sample_docs = load_documents()
         print(f"Loaded {len(sample_docs)} sample documents")
-        # print(f"Sample docs contient: {sample_docs[:1]}")
 
         assistant.add_documents(sample_docs)
 

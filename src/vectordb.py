@@ -5,7 +5,6 @@ from typing import List, Dict, Any
 import chromadb
 from sentence_transformers import SentenceTransformer
 from langchain_huggingface import HuggingFaceEmbeddings
-# from chromadb.utils.embedding_functions import NoopEmbeddingFunction
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
@@ -40,7 +39,6 @@ class VectorDB:
         self.collection = self.client.get_or_create_collection(
             name=self.collection_name,
             metadata={"description": "RAG document collection"},
-            # embedding_function=NoopEmbeddingFunction(),
         )
 
         print(f"Vector database initialized with collection: {self.collection_name}")
@@ -124,25 +122,22 @@ class VectorDB:
             # Create embeddings for all chunks
             try:
                 embeddings = embedding_model.encode(text_chunks).tolist()
-                print(f"[Doc {doc_index}] Generated {len(embeddings)} embeddings")
 
             except Exception as e:
-                print(f"Error generating embeddings for doc {doc_index}:", e)
+                print(f"Error generating embeddings:", e)
 
             # Push to Chroma
             try:
+                print(f"Adding document to vector DB...")
                 self.collection.add(
-                    # ids=ids,
+                    ids=ids,
                     documents=text_chunks,
                     embeddings=embeddings,
                     metadatas=chunked_document,
                 )
-        
             except Exception as e:
                 print(f"Error adding document {doc_index} to vector DB:", e)
             next_id += len(text_chunks)
-            print(f"[Doc {doc_index}] Added {len(text_chunks)} chunks to vector DB")
-
         print("Documents added to vector database")
 
     def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
