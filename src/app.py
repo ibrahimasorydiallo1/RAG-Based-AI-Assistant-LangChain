@@ -123,7 +123,7 @@ class RAGAssistant:
         """
         self.vector_db.add_documents(documents)
 
-    def invoke(self, input: str, n_results: int = 3) -> str:
+    def invoke(self, query: str, n_results: int = 3) -> str:
         """
         Run the full RAG pipeline:
         - Retrieve relevant documents
@@ -139,7 +139,7 @@ class RAGAssistant:
         """
 
         # Retrieve vector results
-        results = self.vector_db.search(input, n_results=n_results)
+        results = self.vector_db.search(query, n_results=n_results)
 
         # Extract only the text of documents
         docs = results["documents"]
@@ -161,7 +161,7 @@ class RAGAssistant:
         # Prepare inputs for the chain
         chain_input = {
             "context": context_text,
-            "question": input
+            "question": query
         }
 
         # Run the RAG chain (prompt → llm → parser)

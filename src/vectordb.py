@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 import chromadb
 from sentence_transformers import SentenceTransformer
 from langchain_huggingface import HuggingFaceEmbeddings
+# from chromadb.utils.embedding_functions import NoopEmbeddingFunction
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
@@ -29,7 +30,7 @@ class VectorDB:
         )
 
         # Initialise ChromaDB client
-        # self.client = chromadb.PersistentClient(path="chroma_db")
+        # self.client = chromadb.PersistentClient(path="./chroma_db")
         self.client = chromadb.Client()
 
         # Load embedding model
@@ -39,6 +40,7 @@ class VectorDB:
         self.collection = self.client.get_or_create_collection(
             name=self.collection_name,
             metadata={"description": "RAG document collection"},
+            # embedding_function=NoopEmbeddingFunction(),
         )
 
         print(f"Vector database initialized with collection: {self.collection_name}")
@@ -99,7 +101,6 @@ class VectorDB:
             )
 
             embedding_model = SentenceTransformer(self.embedding_model_name, device=device)
-            # print(f"Looking at id: {embedding_model}")
 
         except Exception as e:
             print("Error loading embedding model:", e)
@@ -109,17 +110,16 @@ class VectorDB:
 
         # Process each document
         for doc_index, doc in enumerate(documents):
-
             content = doc.page_content
+
             title = doc.metadata.get("source", "")
 
-            print(f"Looking at content: {content}")
             chunked_document = self.chunk_text(content)
 
             text_chunks = [chunk["content"] for chunk in chunked_document]
 
             # Create IDs
-            ids = [f"doc_{i}_chunk_{i}" for i in range(len(text_chunks))]
+            ids = [f"doc_{next_id}_chunk_{i}" for i in range(len(text_chunks))]
 
             # Create embeddings for all chunks
             try:
@@ -129,20 +129,17 @@ class VectorDB:
             except Exception as e:
                 print(f"Error generating embeddings for doc {doc_index}:", e)
 
-            # ASSUREZ-VOUS QUE CES LIGNES SONT EXÉCUTÉES DANS VOTRE CODE
-            # print(f"Longueur des ids: {len(ids)}")
-            # print(f"Longueur des documents (text_chunks): {len(text_chunks)}")
-            # print(f"Longueur des embeddings: {len(embeddings)}")
-            # print(f"Longueur des metadatas (chunked_document): {len(chunked_document)}")
-
             # Push to Chroma
-            self.collection.add(
-                ids=ids,
-                documents=text_chunks,
-                embeddings=embeddings,
-                metadatas=chunked_document,
-            )
-
+            try:
+                self.collection.add(
+                    # ids=ids,
+                    documents=text_chunks,
+                    embeddings=embeddings,
+                    metadatas=chunked_document,
+                )
+        
+            except Exception as e:
+                print(f"Error adding document {doc_index} to vector DB:", e)
             next_id += len(text_chunks)
             print(f"[Doc {doc_index}] Added {len(text_chunks)} chunks to vector DB")
 
@@ -151,15 +148,8 @@ class VectorDB:
     def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
         """
         Search for similar documents in the vector database.
-
-        Args:
-            query: Search query
-            n_results: Number of results to return
-
-        Returns:
-            Dictionary containing search results with keys: 'documents', 'metadatas', 'distances', 'ids'
         """
-        # Convert question to vector
+
         print(f"Retrieving relevant documents for query: {query}")
 
         relevant_results = {
@@ -169,30 +159,26 @@ class VectorDB:
             "metadatas": [],
         }
 
-        # Embed the query using the same model used for documents
         print("Embedding query...")
-        query_embedding = self.embed_documents([query])[0]  # Get the first (and only) embedding
+        query_embedding = self.embedding_model.encode([query])[0].tolist()
 
         print("Querying collection...")
-        # Query the collection
-        # 'query' will allow us to get the n_results nearest neighbor embeddings for provided query_embeddings or query_texts.
         results = self.collection.query(
             query_embeddings=[query_embedding],
             n_results=n_results,
             include=["documents", "distances", "metadatas"],
         )
 
-        print("Filtering results...")
-        keep_item = [False] * len(results["ids"][0])
-        for i, distance in enumerate(results["distances"][0]):
-            if distance < 0.4:  # Example threshold for similarity
-                keep_item[i] = True
+        if not results or not results.get("ids"):
+            print("No results found.")
+            return relevant_results
 
-        for i, keep in enumerate(keep_item):
-            if keep:
+        print("Filtering results...")
+        for i, distance in enumerate(results["distances"][0]):
+            if distance < 0.4:
                 relevant_results["ids"].append(results["ids"][0][i])
                 relevant_results["documents"].append(results["documents"][0][i])
-                relevant_results["distances"].append(results["distances"][0][i])
+                relevant_results["distances"].append(distance)
                 relevant_results["metadatas"].append(results["metadatas"][0][i])
 
         return relevant_results
