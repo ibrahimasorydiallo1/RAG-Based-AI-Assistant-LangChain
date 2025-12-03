@@ -29,10 +29,10 @@ class VectorDB:
         )
 
         # Initialise ChromaDB client
-        self.client = chromadb.PersistentClient(path="./chroma_db")
+        # self.client = chromadb.PersistentClient(path="chroma_db")
+        self.client = chromadb.Client()
 
         # Load embedding model
-        print(f"Loading embedding model: {self.embedding_model_name}")
         self.embedding_model = SentenceTransformer(self.embedding_model_name)
 
         # Get or create collection
@@ -106,7 +106,6 @@ class VectorDB:
 
         # Start ID
         next_id = self.collection.count()
-        # print(f"Looking at id: {next_id}")
 
         # Process each document
         for doc_index, doc in enumerate(documents):
@@ -120,7 +119,7 @@ class VectorDB:
             text_chunks = [chunk["content"] for chunk in chunked_document]
 
             # Create IDs
-            ids = [f"doc_{next_id + i}_chunk_{i}" for i in range(len(text_chunks))]
+            ids = [f"doc_{i}_chunk_{i}" for i in range(len(text_chunks))]
 
             # Create embeddings for all chunks
             try:
@@ -129,6 +128,12 @@ class VectorDB:
 
             except Exception as e:
                 print(f"Error generating embeddings for doc {doc_index}:", e)
+
+            # ASSUREZ-VOUS QUE CES LIGNES SONT EXÉCUTÉES DANS VOTRE CODE
+            # print(f"Longueur des ids: {len(ids)}")
+            # print(f"Longueur des documents (text_chunks): {len(text_chunks)}")
+            # print(f"Longueur des embeddings: {len(embeddings)}")
+            # print(f"Longueur des metadatas (chunked_document): {len(chunked_document)}")
 
             # Push to Chroma
             self.collection.add(
