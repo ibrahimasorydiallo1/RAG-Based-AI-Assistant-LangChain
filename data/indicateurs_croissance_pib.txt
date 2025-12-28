@@ -1,0 +1,7 @@
+Le Produit Intérieur Brut (PIB) est l'indicateur économique principal pour mesurer la richesse produite par un pays sur une période donnée. 
+
+On distingue le PIB nominal (aux prix courants) du PIB réel (ajusté de l'inflation), ce dernier étant le seul capable de mesurer une croissance effective en volume.
+
+La croissance économique dépend de plusieurs facteurs : la consommation des ménages, l'investissement des entreprises, les dépenses publiques et le solde du commerce extérieur (exportations moins importations). 
+
+Une période de baisse du PIB pendant au moins deux trimestres consécutifs est techniquement définie comme une récession.

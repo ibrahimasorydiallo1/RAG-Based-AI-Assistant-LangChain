@@ -106,13 +106,9 @@ RAG-Based-AI-Assistant-LangChain/
 │   ├── app.py                          # Main RAG application
 │   ├── vectordb.py                     # Vector database wrapper
 ├── data/                               # Sample publications
-│   ├── artificial_intelligence.txt
-│   ├── biotechnology.txt
-│   ├── climate_science.txt
-│   ├── quantum_computing.txt
-│   └── sample_documents.txt
-│   └── space_exploration.txt
-│   └── sustainable_energy.txt
+│   ├── indicateurs_croissance_pib.txt
+│   ├── inflation_et_pouvoir_achat.txt
+│   ├── politique_monetaire_banques_centrales.txt
 ├── .gitignore
 ├── LICENSE
 ├── README.md             # This guide
@@ -151,11 +147,18 @@ RAG-Based-AI-Assistant-LangChain/
 
 ## Results
 
-![alt text](https://github.com/ibrahimasorydiallo1/my-first-langgraph-project/blob/main/img_cli.png)
+![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/init_model.png)
 
-![alt text](https://github.com/ibrahimasorydiallo1/my-first-langgraph-project/blob/main/img_cli.png)
+![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/docs_loading)
 
-![alt text](https://github.com/ibrahimasorydiallo1/my-first-langgraph-project/blob/main/img_cli.png)
+![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/response.png)
+
+## Preprocessing and optimization of the query
+
+![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/query_processing.png)
+
+![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/query_processing2.png)
+
 
 ## 🎓 Learning Objectives
 
