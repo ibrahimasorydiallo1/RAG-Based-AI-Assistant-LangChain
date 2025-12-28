@@ -1,12 +1,12 @@
-# RAG-Based-AI-Assistant
-This is a RAG (Retrieval-Augmented Generation) AI assistant. RAG systems combine document search with AI chat - they can answer questions about our specific documents by finding relevant information and using it to generate responses.  Think of it as: ChatGPT that knows about OUR documents and can answer questions about them.
+# RAG-Based-AI-Economics Assistant
+This is a RAG (Retrieval-Augmented Generation) AI assistant based on Economics. RAG systems combine document search with AI chat - they can answer questions about our specific documents by finding relevant information and using it to generate responses.  Think of it as: ChatGPT that knows about OUR documents and can answer questions about them.
 
 ## Target Audience
 
 I had the opportunity to complete this project in order to validate my 1st module in my learning journey with Ready Tensor AI:
 https://www.readytensor.ai/
 
-This project is addressed also to other students who are striving to become one of best in this field. It is also addressed to recruiters as I am looking for an intership to get my degree.
+This project is addressed also to other students who are striving to become one of best in this field. It is also addressed to recruiters as I am looking for an internship to get my degree.
 
 ## 🎯 What we'll build
 
@@ -133,6 +133,8 @@ RAG-Based-AI-Assistant-LangChain/
 
    ```bash
    pip install -r requirements.txt
+
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
    ```
 
 3. **Set up the Groq API key:**
@@ -146,6 +148,14 @@ RAG-Based-AI-Assistant-LangChain/
    You can get the API key from [Groq](https://console.groq.com/).
 
 ---
+
+## Results
+
+![alt text](https://github.com/ibrahimasorydiallo1/my-first-langgraph-project/blob/main/img_cli.png)
+
+![alt text](https://github.com/ibrahimasorydiallo1/my-first-langgraph-project/blob/main/img_cli.png)
+
+![alt text](https://github.com/ibrahimasorydiallo1/my-first-langgraph-project/blob/main/img_cli.png)
 
 ## 🎓 Learning Objectives
 
