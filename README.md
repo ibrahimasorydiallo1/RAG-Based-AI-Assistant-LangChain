@@ -147,17 +147,17 @@ RAG-Based-AI-Assistant-LangChain/
 
 ## Results
 
-![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/init_model.png)
+![alt text](src/init_model.png)
 
-![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/docs_loading)
+![alt text](src/docs_loading)
 
-![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/response.png)
+![alt text](src/response.png)
 
 ## Preprocessing and optimization of the query
 
-![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/query_processing.png)
+![alt text](src/query_processing.png)
 
-![alt text](https://github.com/ibrahimasorydiallo1/RAG-Based-AI-Assistant-LangChain/src/query_processing2.png)
+![alt text](src/query_processing2.png)
 
 
 ## 🎓 Learning Objectives
