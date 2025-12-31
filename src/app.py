@@ -64,7 +64,7 @@ class RAGAssistant:
 
         # Create RAG prompt template
         template = """
-            You are a helpful, professional research assistant that answers questions about AI/ML and data science projects.
+            You are a helpful, professional research assistant that answers questions about economics and related concepts.
             Use clear, concise language. Prefer bullet points for explanations when appropriate.
             Output must be Markdown.
 
