@@ -13,7 +13,7 @@ load_dotenv()
 
 st.set_page_config(page_title="Eco-RAG Assistant", page_icon="📈")
 st.title("📈 Economy Research Assistant")
-st.markdown("Ask questions based on the uploaded economic documents.")
+st.markdown("Pose des questions basées sur les documents téléchargés.")
 
 st.html("<style>[data-testid='stHeaderActionElements'] {display: none;}</style>")
 
