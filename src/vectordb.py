@@ -97,6 +97,7 @@ class VectorDB:
                 if torch.cuda.is_available()
                 else "mps" if torch.backends.mps.is_available() else "cpu"
             )
+            # print(f"Loading embedding model on device: {device}")
 
             embedding_model = SentenceTransformer(self.embedding_model_name, device=device)
 
@@ -105,6 +106,7 @@ class VectorDB:
 
         # Start ID
         next_id = self.collection.count()
+        # print(f"Starting document IDs at: {next_id}")
 
         # Process each document
         for doc_index, doc in enumerate(documents):

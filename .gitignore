@@ -5,6 +5,8 @@ venv/
 
 # Environment variables
 .env
+.env.local
+.deepeval
 
 # Python
 __pycache__/
